@@ -1,6 +1,8 @@
 import numpy as np
 from PIL import Image
 
+from decompression import decompress
+
 print(-4%5)
 # 1. Add padding so the image size is a multiple of the block size
 def add_padding(img, bh, bw):
@@ -100,25 +102,61 @@ def compression_ratio(orig_h, orig_w, bh, bw, K, n_blocks, n):
 
 
 # ----------------------------- main -----------------------------
+
+
 if __name__ == "__main__":
-    # path = input("Image path: ")
-    # bh = int(input("Block height: "))
-    # bw = int(input("Block width: "))
-    # K = int(input("Number of vectors in codebook: "))
-    path="peppers.png"
-    bh=2
-    bw=2
-    K=4    
 
-    img = np.array(Image.open(path).convert("L"))      
-    orig_h, orig_w = img.shape
+    choice = input("Choose operation (1: Compression, 2: Decompression): ")
 
-    padded = add_padding(img, bh, bw)
-    blocks = split_into_blocks(padded, bh, bw)
-    codebook, labels = lbg(blocks, K)
-    n = save_files(codebook, labels, bh, bw, orig_h, orig_w, "codebook.txt", "compressed.bin")
+    if choice == "1":
 
-    original, cb_bits, lab_bits, ratio = compression_ratio(orig_h, orig_w, bh, bw, K, len(blocks), n)
-    print("Original size :", original, "bits")
-    print("Codebook size :", cb_bits, "bits")
-    print("Labels size   :", lab_bits, "bits")
+        # path = input("Image path: ")
+        # bh = int(input("Block height: "))
+        # bw = int(input("Block width: "))
+        # K = int(input("Number of vectors in codebook: "))
+
+        path = "peppers.png"
+        bh = 2
+        bw = 2
+        K = 4
+
+        img = np.array(Image.open(path).convert("L"))
+        orig_h, orig_w = img.shape
+
+        padded = add_padding(img, bh, bw)
+        blocks = split_into_blocks(padded, bh, bw)
+
+        codebook, labels = lbg(blocks, K)
+
+        n = save_files(
+            codebook, labels, bh, bw,
+            orig_h, orig_w,
+            "codebook.txt", "compressed.bin"
+        )
+
+        original, cb_bits, lab_bits, ratio = compression_ratio(
+            orig_h, orig_w, bh, bw, K, len(blocks), n
+        )
+
+        print("\n--- Compression Results ---")
+        print("Original size :", original, "bits")
+        print("Codebook size :", cb_bits, "bits")
+        print("Labels size   :", lab_bits, "bits")
+        print("Compression Ratio :", ratio)
+
+    elif choice == "2":
+
+        # Decompress using the previously saved files
+        decompress(
+            "codebook.txt",
+            "compressed.bin",
+            "reconstructed.png"
+        )
+
+    else:
+        print("Invalid choice! Please choose 1 or 2.")
+
+
+
+
+
